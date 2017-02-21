@@ -1,0 +1,21 @@
+{
+  "name": "triads",
+  "version": "1.0.0",
+  "devDependencies": {
+    "react-scripts": "0.8.5",
+    "sw-precache": "^4.3.0",
+    "teoria": "^2.2.0",
+    "vexflow": "^1.2.83"
+  },
+  "dependencies": {
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build && cp manifest.json build/ && sw-precache --root='build/' --static-file-globs='build/**/!(*map*)'",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "homepage": "./"
+}

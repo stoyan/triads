@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
+    <meta name="theme-color" content="#222">
+    <title>triads</title>
+    <style>
+    body {
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      font-family: Helvetica Neue, sans-serif;
+    }
+    .App {
+      text-align: center;
+    }
+
+    .App-header, .App-footer {
+      background-color: #233041;
+      padding: 20px;
+      color: #efefef;
+    }
+
+    .App-header a, .App-footer a{
+      color: #efefef;
+    }
+
+    .App-header a:hover, .App-footer a:hover {
+      text-decoration: none;
+      color: #efefef;
+    }
+
+    h1 {
+      font-size: 40px;
+      margin: 0px;
+    }
+
+    .App-body {
+      font-size: large;
+      color: #111;
+      padding: 20px;
+    }
+
+    .smallprint {
+      font-size: small;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="App">
+      <div class="App-header">
+        <h1>triads</h1>
+          <p>Flashcards for practicing
+            <a href="http://music.stoyanstefanov.com/2017/02/20/triads/">
+              major, minor, augmented and diminished triads
+            </a>
+        </p>
+      </div>
+      <div class="App-body" id="root">Loading the flashcards...</div>
+      <p class="smallprint">
+        Keyboard shortcuts: 
+          Play ('P' or 'p' or space), 
+          Next ('N' or 'n' or right arrow), 
+          Flip ('F' or 'f' or up or down arrow)
+      </p>
+      <div class="App-footer smallprint">
+        created with ♥ by <a href="http://music.stoyanstefanov.com/">Stoyan</a>, 
+        you can make tools like this too, 
+        learn from <a href="https://www.amazon.com/dp/1491931825/?tag=w3clubs-20">the best React book</a>
+      </div>
+    </div>
+    
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js');
+      }
+    </script>
+    <div style="display: none"><div id="_vex"></div></div>
+  </body>
+</html>
