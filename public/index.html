@@ -6,13 +6,14 @@
     <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
     <meta name="theme-color" content="#222">
-    <title>triads</title>
+    <title>Triads</title>
     <style>
     body {
       margin: 0;
       padding: 0;
       line-height: 1.6;
       font-family: Helvetica Neue, sans-serif;
+      overflow-x: hidden;
     }
     .App {
       text-align: center;
@@ -47,37 +48,56 @@
     .smallprint {
       font-size: small;
     }
+    
+    @media (max-width: 480px) {
+      #shortcuts {display: none;}
+      h1 {font-size: 30px;}
+      h2 {margin: 30px 0 15px;}
+      .App-header, .App-footer {padding: 10px;}
+    }
+    #home {
+      position: absolute;
+      text-decoration: none;
+      font-size: medium;
+      top: 10px;
+      left: 10px;
+      opacity: 0.8;
+    }
+    @media (min-width: 480px) {
+      #home::after {
+        content: ' Home';
+      }
+    }
+    #home:hover {
+      opacity: 0.95;
+      text-decoration: underline;
+    }
     </style>
   </head>
   <body>
     <div class="App">
       <div class="App-header">
-        <h1>triads</h1>
-          <p>Flashcards for practicing
-            <a href="http://music.stoyanstefanov.com/2017/02/20/triads/">
-              major, minor, augmented and diminished triads
-            </a>
+        <h1>Triads</h1>
+        <p>Flashcards for practicing
+          <a href="https://music.stoyanstefanov.com/2017/02/20/triads/">
+            major, minor, augmented, diminished</a> and a couple more triads
         </p>
+        <a href="/" title="Go to the home page" id="home">⬅</a>
       </div>
       <div class="App-body" id="root">Loading the flashcards...</div>
-      <p class="smallprint">
+      <p class="smallprint" id="shortcuts">
         Keyboard shortcuts: 
           Play ('P' or 'p' or space), 
           Next ('N' or 'n' or right arrow), 
           Flip ('F' or 'f' or up or down arrow)
       </p>
       <div class="App-footer smallprint">
-        created with ♥ by <a href="http://music.stoyanstefanov.com/">Stoyan</a>, 
-        you can make tools like this too, 
-        learn from <a href="https://www.amazon.com/dp/1491931825/?tag=w3clubs-20">the best React book</a>
+        <p>
+          created with ♬♥ by <a href="https://music.stoyanstefanov.com/">Stoyan</a>
+        </p>
       </div>
     </div>
     
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js');
-      }
-    </script>
     <div style="display: none"><div id="_vex"></div></div>
   </body>
 </html>
