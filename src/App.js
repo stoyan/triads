@@ -41,7 +41,7 @@ const util = {
   isiOS: (() => {
     return !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
   })(),
-  
+
   allNotes: (() => {
     const names = 'C,C#/Db,D,D#/Eb,E,F,F#/Gb,G,G#/Ab,A,A#/Bb,B'.split(',');
     let octave = 0;
@@ -56,7 +56,7 @@ const util = {
     }
     return notes;
   })(),
-  
+
   getRange(start, end, noAccidentals) {
     const notesLookup = util.allNotes;
     const res = notesLookup.slice(notesLookup.indexOf(start), notesLookup.indexOf(end) + 1);
@@ -65,27 +65,27 @@ const util = {
     }
     return res.filter(v => !v.includes('/'));
   },
-  
+
   getRand(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
   },
-  
+
   getRandomElement(arr) {
     return arr[util.getRand(0, arr.length - 1)];
   },
-  
+
   randomSortCallback() {
     return 0.5 - Math.random();
   },
-  
+
   prettyChord(triad) {
     return triad.toString().replace('M', '').replace('#', '♯').replace(/b/g, '♭');
   },
-  
+
   prettyNote(note) {
-    return note.name().toUpperCase() + 
+    return note.name().toUpperCase() +
       note.accidental()
         .replace('#', '♯')
         .replace(/b/g, '♭')
@@ -106,6 +106,7 @@ const settings = {
   sus4: false,
   ledger: 'ledger2',
   mode: 'id',
+  accidentals: true
 };
 
 if (window.location.hash.substring(1)) {
@@ -115,7 +116,7 @@ if (window.location.hash.substring(1)) {
   });
   settings.ledger = hash.includes('ledger2') ? 'ledger2' : hash.includes('ledger1') ? 'ledger1' : 'ledger0';
   settings.mode = hash.includes('ear') ? 'ear' : hash.includes('spell') ? 'spell' : 'id';
-  
+
   if (!legalClefs.some(clef => !!settings[clef])) {
     settings.treble = true;
   }
@@ -126,16 +127,16 @@ if (window.location.hash.substring(1)) {
 
 function updateSettings(e) {
   if (e.target.nodeName === 'SELECT') {
-    settings[e.target.getAttribute('id')] = e.target.value;  
+    settings[e.target.getAttribute('id')] = e.target.value;
   } else {
-    settings[e.target.getAttribute('id')] = e.target.checked;  
+    settings[e.target.getAttribute('id')] = e.target.checked;
   }
-  
+
   if (!legalClefs.some(clef => !!settings[clef])) {
     e.target.checked = true;
     settings[e.target.getAttribute('id')] = true;
     alert('Pick at least one clef');
-    
+
   }
   if (!legalTriads.some(t => !!settings[t])) {
     e.target.checked = true;
@@ -148,7 +149,7 @@ function updateSettings(e) {
     .join(',')
     .replace('ledger', settings['ledger'])
     .replace('mode', settings['mode']);
-  
+
   if (window.location.hash.substring(1).split(',').length === Object.keys(settings).length) {
     // all the options = default
     window.location.hash = '';
@@ -175,40 +176,41 @@ function getQuestion(i) {
       triadOptions.push(c);
     }
   });
-  let ledgerOption = parseInt(settings.ledger.replace('ledger', ''))  
+  let ledgerOption = parseInt(settings.ledger.replace('ledger', ''))
   const vf = new Vex.Flow.Factory({
     renderer: {elementId: '_vex', width: 150, height: 150}
   });
   const score = vf.EasyScore();
   const system = vf.System();
   let clef;
-  
+
   try {
     clef = util.getRandomElement(clefOptions);
     const tri = util.getRandomElement(triadOptions);
     triadType = triadQualities[tri];
     const ra = legalRanges[clef][ledgerOption];
-    const range = util.getRange(ra[0], ra[1]).slice(0, -7);
-    let rando = util.getRandomElement(range).split('/').sort(util.randomSortCallback)[0];
-    const bottomNote = Teoria.note(rando);  
+    const range = util.getRange(ra[0], ra[1], settings.accidentals === false);
+    const rootRange = range.slice(0, settings.accidentals === false ? -4 : -7);
+    let rando = util.getRandomElement(rootRange).split('/').sort(util.randomSortCallback)[0];
+    const bottomNote = Teoria.note(rando);
     chord = bottomNote.chord(tri);
     notes = chord.notes();
 
     const voices = notes.slice().map(note => note.toString().replace('x', '##')).join(' ');
     system.addStave({voices: [score.voice(score.notes('('+ voices +')/w', {clef}))]}).addClef(clef);
 
-    vf.draw();      
+    vf.draw();
   } catch(_){
     return getQuestion();
   }
 
   svg = null;
   if (settings.mode === 'id') {
-    return vf.context.svg;  
+    return vf.context.svg;
   } else {
     svg = vf.context.svg;
   }
-  
+
   if (settings.mode === 'ear') {
     return <div>Press one of the play buttons to hear the chord. Try to figure out its quality. <p>When done, click here to reveal the answer.</p></div>;
   }
@@ -217,7 +219,7 @@ function getQuestion(i) {
     return (
       <div>
         On your own paper please spell out <strong>
-        {chord.toString().replace('M', '').replace('#', '♯').replace(/b/g, '♭')}</strong> in <strong>{clef}</strong> clef. 
+        {chord.toString().replace('M', '').replace('#', '♯').replace(/b/g, '♭')}</strong> in <strong>{clef}</strong> clef.
         <p>When done, click to reveal the answer.</p>
       </div>
     );
@@ -238,19 +240,19 @@ function getAnswer(i) {
       </div>
     );
   }
-  
+
   return (
     <div>
       <p><strong>{triadType}</strong></p>
       <p>{prettyChord}</p>
       <p>{notes.map(util.prettyNote).join(', ')}</p>
     </div>
-  );  
+  );
 }
 
 function getAudio() {
   const samples = 'https://www.onlinemusictools.com/_samples/';
-  return notes.map(note => 
+  return notes.map(note =>
     new Audio(samples + note.midi() + '.mp3')
   );
 }
@@ -293,7 +295,7 @@ class App extends Component {
       }
     });
   }
-  
+
   nextQuestion() {
     this.pause();
     this.setState({
@@ -304,8 +306,8 @@ class App extends Component {
       playingNote: -1,
     });
   }
-  
-  pause() {    
+
+  pause() {
     for (const note of this.state.audio) {
       note.pause();
       note.currentTime = 0;
@@ -320,7 +322,7 @@ class App extends Component {
       note.play();
     }
   }
-  
+
   playNextNote() {
     let playingNote = this.state.playingNote;
     playingNote++;
@@ -332,22 +334,22 @@ class App extends Component {
     note.play();
     this.setState({playingNote});
   }
-  
+
   toggleSettings() {
     if (this.state.settings) {
       this.nextQuestion();
     }
     this.setState({settings: !this.state.settings});
   }
-  
+
   render() {
     return (
       <div>
         <div className="settings">
           <div className="settingsLink" onClick={this.toggleSettings.bind(this)}>⚙ Customize</div>
-          {this.state.settings 
+          {this.state.settings
           ? <div>
-              <Settings /> 
+              <Settings />
               <button className="settingsButton" onClick={e => {
                 this.toggleSettings();
                 this.nextQuestion();
@@ -357,7 +359,7 @@ class App extends Component {
           }
         </div>
         {
-          this.state.total 
+          this.state.total
             ? <Count i={this.state.i} total={this.state.total} />
             : null
         }
@@ -366,22 +368,22 @@ class App extends Component {
           question={this.state.question}
           answer={this.state.answer}
         />
-        <button 
-          className="playButton" 
+        <button
+          className="playButton"
           onMouseDown={this.playChord.bind(this)}>
           {util.isiOS ? 'play chord' : '▶ chord'}
         </button>
         {' '}
-        <button 
-          className="playButton" 
+        <button
+          className="playButton"
           onMouseDown={this.playNextNote.bind(this)}>
           {util.isiOS ? 'play' : '▶'}
           {' note ' +
             (this.state.playingNote === -1 || this.state.playingNote === this.state.audio.length
-              ? 1 
+              ? 1
               : (this.state.playingNote + 1)
             ) +
-            '/' + 
+            '/' +
             (this.state.audio.length)
           }
         </button>
@@ -389,8 +391,8 @@ class App extends Component {
         {
           (this.state.total && this.state.i >= this.state.total)
             ? null
-            : <button 
-                className="nextButton" 
+            : <button
+                className="nextButton"
                 onClick={this.nextQuestion.bind(this)}>
                 next...
               </button>
@@ -443,7 +445,7 @@ class Flashcard extends Component {
         <div className={className} onClick={this.flip.bind(this)}>
           <div className="flipper">
             <div className="front" style={{display: this.state.reveal ? 'none' : ''}}>
-              {settings.mode === 'id' 
+              {settings.mode === 'id'
                 ? <div dangerouslySetInnerHTML={{__html: this.props.question.outerHTML}} />
                 : <div>{this.props.question}</div>
               }
@@ -469,7 +471,7 @@ const Settings = () =>
     <tr><th>Clefs</th><th>Triads</th><th>Max ledger lines</th></tr>
     <tr><td>
     {
-      legalClefs.map(c => 
+      legalClefs.map(c =>
         <div key={c}>
           <input type="checkbox" id={c} defaultChecked={settings[c]} onChange={updateSettings}/>
           <label htmlFor={c}>{c}</label>
@@ -478,7 +480,7 @@ const Settings = () =>
     }
     </td><td>
     {
-      legalTriads.map(s => 
+      legalTriads.map(s =>
         <div key={s}>
           <input type="checkbox" id={s} defaultChecked={settings[s]} onChange={updateSettings}/>
           <label htmlFor={s}>{s}</label>
@@ -495,6 +497,11 @@ const Settings = () =>
         </select>
       </div>
     }
+    <div>
+      <p><strong>Accidentals</strong></p>
+      <input type="checkbox" id="accidentals" defaultChecked={settings.accidentals} onChange={updateSettings} />
+      <label htmlFor="accidentals">Chords based on non-natural tonics</label>
+    </div>
     <p>
       <strong>Exercise mode</strong>
       <br/>
@@ -506,5 +513,5 @@ const Settings = () =>
     </p>
     </td></tr>
   </tbody></table>;
-  
+
 export default App;
