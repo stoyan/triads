@@ -11,6 +11,11 @@ const triadQualities = {
   sus2: 'sus2',
   sus4: 'sus4',
 };
+const invertableTriads = [
+  'major',
+  'minor',
+  'diminished'
+];
 const legalClefs = ['treble', 'bass', 'alto', 'tenor'];
 const legalTriads = ['M', 'm', 'aug', 'dim', 'sus2', 'sus4'];
 const legalInversions = ['inv0', 'inv1', 'inv2'];
@@ -194,7 +199,7 @@ function getCount() {
   return null;
 }
 
-function getInversion(chord, inv) {
+function getInversion(chord, inv, range) {
 
   const voices = chord.simple().length;
   inv = inv % voices;
@@ -223,6 +228,17 @@ function getInversion(chord, inv) {
   });
 
   chord.voicing(simple_inversion);
+
+  // Transpose chord up/down an octave if it breaks ledger line rules
+  // Note: certain triad inversions are impossible to place on certain staves without ledger lines:
+  // (e.g: in treble clef, all 1st-inversion A triads (and 2nd-inversion F triads)
+  // require a ledger line for either C4 or A5)
+  //
+  if (chord.notes()[chord.notes().length - 1].key(true) > Teoria.note(range[range.length - 1]).key(true) + 1) {
+    chord.transpose(Teoria.interval('P-8'));
+  } else if (chord.notes()[0].key(true) < Teoria.note(range[0]).key(true) - 1) {
+    chord.transpose(Teoria.interval('P8'));
+  }
 
   return chord;
 }
@@ -259,12 +275,13 @@ function getQuestion(i) {
     const tri = util.getRandomElement(triadOptions);
     triadType = triadQualities[tri];
     const ra = legalRanges[clef][ledgerOption];
-    const range = util.getRange(ra[0], ra[1]).slice(0, -7);
-    let rando = util.getRandomElement(range).split('/').sort(util.randomSortCallback)[0];
+    const range = util.getRange(ra[0], ra[1])
+    const rootRange = range.slice(-7);
+    let rando = util.getRandomElement(rootRange).split('/').sort(util.randomSortCallback)[0];
     const bottomNote = Teoria.note(rando);
     chord = bottomNote.chord(tri);
-    inversionType = util.getRandomElement(inversionOptions);
-    chord = getInversion(chord, inversionType);
+    inversionType = invertableTriads.indexOf(triadType) > -1 ? util.getRandomElement(inversionOptions) : 0;
+    chord = getInversion(chord, inversionType, range);
     notes = chord.notes();
 
     const voices = notes.slice().map(note => note.toString().replace('x', '##')).join(' ');
