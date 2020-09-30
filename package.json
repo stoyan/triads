@@ -2,7 +2,7 @@
   "name": "triads",
   "version": "1.0.0",
   "devDependencies": {
-    "react-scripts": "^3.4.1",
+    "react-scripts": "^3.4.3",
     "teoria": "^2.2.0",
     "vexflow": "^1.2.93"
   },
