@@ -392,7 +392,13 @@ class App extends Component {
       i: this.state.i + 1,
       audio: getAudio(this.state.i + 1),
       playingNote: -1,
-    })
+    }, () => { this.autoPlay() })
+  }
+
+  autoPlay() {
+    if (settings.mode === 'ear') {
+      this.playChord();
+    }
   }
 
   pause() {
