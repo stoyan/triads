@@ -133,6 +133,7 @@ const settings = {
   sus4: false,
   ledger: 'ledger2',
   mode: 'id',
+  accidentals: true
   inv0: true,
   inv1: false,
   inv2: false
@@ -256,13 +257,13 @@ function getQuestion(i) {
       triadOptions.push(c);
     }
   });
+  let ledgerOption = parseInt(settings.ledger.replace('ledger', ''));
   const inversionOptions = [];
   legalInversions.forEach(c => {
     if (settings[c]) {
       inversionOptions.push(parseInt(c.replace('inv', '')));
     }
   });
-  let ledgerOption = parseInt(settings.ledger.replace('ledger', ''));
   const vf = new Vex.Flow.Factory({
     renderer: {elementId: '_vex', width: 150, height: 150}
   });
@@ -275,8 +276,8 @@ function getQuestion(i) {
     const tri = util.getRandomElement(triadOptions);
     triadType = triadQualities[tri];
     const ra = legalRanges[clef][ledgerOption];
-    const range = util.getRange(ra[0], ra[1])
-    const rootRange = range.slice(-7);
+    const range = util.getRange(ra[0], ra[1], settings.accidentals === false);
+    const rootRange = range.slice(0, settings.accidentals === false ? -4 : -7);
     let rando = util.getRandomElement(rootRange).split('/').sort(util.randomSortCallback)[0];
     const bottomNote = Teoria.note(rando);
     chord = bottomNote.chord(tri);
@@ -601,6 +602,11 @@ const Settings = () =>
         </select>
       </div>
     }
+    <div>
+      <p><strong>Accidentals</strong></p>
+      <input type="checkbox" id="accidentals" defaultChecked={settings.accidentals} onChange={updateSettings} />
+      <label htmlFor="accidentals">Chords based on non-natural tonics</label>
+    </div>
     <p>
       <strong>Exercise mode</strong>
       <br/>
