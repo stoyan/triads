@@ -1,6 +1,6 @@
 # Triads
 
-An app to help learn music triads: major, minor, augmented, diminished
+An app to help learn music triads: major, minor, augmented, diminished, suspended
 
 ## Try it out
 
@@ -10,7 +10,11 @@ An app to help learn music triads: major, minor, augmented, diminished
 
 [Blog post](http://phpied.com/intervals) about the similar [Intervals](https://www.onlinemusictools.com/intervals/) tool
 
-## Build with...
+## Contributors
+  * [Stoyan Stefanov](https://www.phpied.com)
+  * [Morgan Martin](https://github.com/jmorganmartin)
+
+## Built with...
 
   * [Piano samples](https://github.com/ryanatkn/ear-sharpener/tree/master/static/audio/notes)
   * [Music notation](https://github.com/0xfe/vexflow)
