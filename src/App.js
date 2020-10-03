@@ -709,9 +709,14 @@ const Settings = () => (
             </div>
           ))}
           <p>
-            <strong><abbr title={
-              `Only applicable to \n${invertibleTriads.join(', ')} chords`
-            }>Inversions</abbr></strong>
+            <strong>
+              <abbr
+                title={`Only applicable to \n${invertibleTriads.join(
+                  ', ',
+                )} chords.\nThe other chords are always in root position.`}>
+                Inversions
+              </abbr>
+            </strong>
             {['r', 1, 2].map((s) => (
               <div key={s}>
                 <input
