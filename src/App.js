@@ -11,10 +11,17 @@ const triadQualities = {
   sus2: 'sus2',
   sus4: 'sus4',
 };
-const invertableTriads = ['major', 'minor', 'diminished'];
+
+const inversions = {
+  r: 'Root',
+  1: '1st',
+  2: '2nd',
+};
+
+const invertibleTriads = ['major', 'minor', 'diminished'];
 const legalClefs = ['treble', 'bass', 'alto', 'tenor'];
 const legalTriads = ['M', 'm', 'aug', 'dim', 'sus2', 'sus4'];
-const legalInversions = ['inv0', 'inv1', 'inv2'];
+const legalInversions = Object.keys(inversions);
 
 const legalRanges = {
   treble: {
@@ -89,8 +96,8 @@ const util = {
   },
 
   ordinalSuffix(num) {
-    const j = num % 10,
-      k = num % 100;
+    const j = num % 10;
+    const k = num % 100;
     if (j === 1 && k !== 11) {
       return num + 'st';
     }
@@ -101,6 +108,16 @@ const util = {
       return num + 'rd';
     }
     return num + 'th';
+  },
+
+  prettyInversion(inversionType, triadType) {
+    if (!invertibleTriads.includes(triadType)) {
+      return '';
+    }
+    if (inversionType === 'r') {
+      return ', root position';
+    }
+    return ', ' + this.ordinalSuffix(inversionType) + ' inversion';
   },
 
   randomSortCallback() {
@@ -137,9 +154,9 @@ const settings = {
   ledger: 'ledger2',
   mode: 'id',
   accidentals: true,
-  inv0: true,
-  inv1: false,
-  inv2: false,
+  r: true,
+  1: false,
+  2: false,
 };
 
 if (window.location.hash.substring(1)) {
@@ -282,7 +299,7 @@ function getQuestion(i) {
   const inversionOptions = [];
   legalInversions.forEach((c) => {
     if (settings[c]) {
-      inversionOptions.push(parseInt(c.replace('inv', '')));
+      inversionOptions.push(c.replace('inv', ''));
     }
   });
   const vf = new Vex.Flow.Factory({
@@ -306,9 +323,9 @@ function getQuestion(i) {
     const bottomNote = Teoria.note(rando);
     chord = bottomNote.chord(tri);
     inversionType =
-      invertableTriads.indexOf(triadType) > -1
+      invertibleTriads.indexOf(triadType) > -1
         ? util.getRandomElement(inversionOptions)
-        : 0;
+        : 'r';
     chord = getInversion(chord, inversionType, range);
     notes = chord.notes();
 
@@ -353,8 +370,7 @@ function getQuestion(i) {
             .replace('M', '')
             .replace('#', '♯')
             .replace(/b/g, '♭')}
-          , {inversionType === 0 ? 'Root' : util.ordinalSuffix(inversionType)}{' '}
-          inversion
+          {util.prettyInversion(inversionType, triadType)}
         </strong>{' '}
         in <strong>{clef}</strong> clef.
         <p>When done, click to reveal the answer.</p>
@@ -372,9 +388,8 @@ function getAnswer(i) {
   if (settings.mode === 'spell') {
     return (
       <div>
-        {prettyChord},{' '}
-        {inversionType === 0 ? 'Root' : util.ordinalSuffix(inversionType)}{' '}
-        inversion
+        {prettyChord}
+        {util.prettyInversion(inversionType, triadType)}
         <br />
         {stave}
       </div>
@@ -383,24 +398,21 @@ function getAnswer(i) {
   if (settings.mode === 'ear') {
     return (
       <div>
-        <strong>{triadType}</strong> ({prettyChord},{' '}
-        {inversionType === 0 ? 'Root' : util.ordinalSuffix(inversionType)}{' '}
-        inversion)
+        <strong>{triadType}</strong> ({prettyChord}
+        {util.prettyInversion(inversionType, triadType)})
         <br />
         {stave}
       </div>
     );
   }
-
   return (
     <div>
       <p>
         <strong>{triadType}</strong>
       </p>
       <p>
-        {prettyChord},{' '}
-        {inversionType === 0 ? 'Root' : util.ordinalSuffix(inversionType)}{' '}
-        inversion
+        {prettyChord}
+        {util.prettyInversion(inversionType, triadType)}
       </p>
       <p>{notes.map(util.prettyNote).join(', ')}</p>
     </div>
@@ -685,7 +697,6 @@ const Settings = () => (
           ))}
         </td>
         <td>
-          <h5>Qualities</h5>
           {legalTriads.map((s) => (
             <div key={s}>
               <input
@@ -697,18 +708,22 @@ const Settings = () => (
               <label htmlFor={s}>{s}</label>
             </div>
           ))}
-          <h5>Inversions</h5>
-          {legalInversions.map((s) => (
-            <div key={s}>
-              <input
-                type="checkbox"
-                id={s}
-                defaultChecked={settings[s]}
-                onChange={updateSettings}
-              />
-              <label htmlFor={s}>{s}</label>
-            </div>
-          ))}
+          <p>
+            <strong><abbr title={
+              `Only applicable to \n${invertibleTriads.join(', ')} chords`
+            }>Inversions</abbr></strong>
+            {['r', 1, 2].map((s) => (
+              <div key={s}>
+                <input
+                  type="checkbox"
+                  id={s}
+                  defaultChecked={settings[s]}
+                  onChange={updateSettings}
+                />
+                <label htmlFor={s}>{inversions[s]}</label>
+              </div>
+            ))}
+          </p>
         </td>
         <td>
           {
@@ -723,22 +738,19 @@ const Settings = () => (
               </select>
             </div>
           }
-          <div>
-            <p>
-              <strong>Accidentals</strong>
-            </p>
+          <p>
+            <strong>Accidentals</strong>
+            <br />
             <input
               type="checkbox"
               id="accidentals"
               defaultChecked={settings.accidentals}
               onChange={updateSettings}
             />
-            <label htmlFor="accidentals">
-              Chords based on non-natural tonics
-            </label>
-          </div>
+            <label htmlFor="accidentals">Allow in chord roots</label>
+          </p>
           <p>
-            <strong>Exercise mode</strong>
+            <strong>Exercise type</strong>
             <br />
             <select
               id="mode"
